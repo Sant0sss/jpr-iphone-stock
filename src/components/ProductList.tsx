@@ -46,7 +46,15 @@ const ProductList = () => {
           product.estoque?.toLowerCase().includes('disponivel')
         ));
       
-      const matchesDate = !dateFilter || product.data === dateFilter;
+      const matchesDate = !dateFilter || (() => {
+        if (!product.data) return false;
+        // Normalizar ambas as datas para comparação
+        // Se data do banco está em DD/MM/YYYY, converter para YYYY-MM-DD
+        const dbDate = product.data.includes('/') 
+          ? product.data.split('/').reverse().join('-') 
+          : product.data;
+        return dbDate === dateFilter;
+      })();
       
       return matchesSearch && matchesStock && matchesDate;
     });

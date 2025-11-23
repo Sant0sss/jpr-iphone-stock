@@ -11,6 +11,7 @@ type Product = Database['public']['Tables']['produtos']['Row'];
 const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['produtos'],
@@ -36,12 +37,20 @@ const ProductList = () => {
       
       const matchesStock = 
         stockFilter === "all" ||
-        (stockFilter === "available" && product.estoque?.toUpperCase() === "DISPONIVEL") ||
-        (stockFilter === "unavailable" && product.estoque?.toUpperCase() !== "DISPONIVEL");
+        (stockFilter === "available" && (
+          product.estoque?.toLowerCase().includes('disponível') || 
+          product.estoque?.toLowerCase().includes('disponivel')
+        )) ||
+        (stockFilter === "unavailable" && !(
+          product.estoque?.toLowerCase().includes('disponível') || 
+          product.estoque?.toLowerCase().includes('disponivel')
+        ));
       
-      return matchesSearch && matchesStock;
+      const matchesDate = !dateFilter || product.data === dateFilter;
+      
+      return matchesSearch && matchesStock && matchesDate;
     });
-  }, [products, searchTerm, stockFilter]);
+  }, [products, searchTerm, stockFilter, dateFilter]);
 
   if (isLoading) {
     return (
@@ -66,6 +75,8 @@ const ProductList = () => {
         onSearchChange={setSearchTerm}
         stockFilter={stockFilter}
         onStockFilterChange={setStockFilter}
+        dateFilter={dateFilter}
+        onDateFilterChange={setDateFilter}
       />
       
       {filteredProducts.length === 0 ? (

@@ -9,7 +9,8 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const isAvailable = product.estoque?.toUpperCase() === 'DISPONIVEL';
+  const isAvailable = product.estoque?.toLowerCase().includes('disponível') || 
+                      product.estoque?.toLowerCase().includes('disponivel');
   
   return (
     <Card className="bg-gradient-card shadow-elegant hover:shadow-hover transition-all duration-300 border-border/50">

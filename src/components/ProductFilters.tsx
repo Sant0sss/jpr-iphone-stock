@@ -20,15 +20,26 @@ const ProductFilters = ({
   onDateFilterChange
 }: ProductFiltersProps) => {
   return (
-    <div className="flex flex-col gap-4 mb-6">
+    <div className="mb-6">
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
+        <div className="relative flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por modelo, cor ou revendedor..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10 bg-card border-border"
+          />
+        </div>
+        
+        <div className="relative sm:w-[220px]">
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/60 pointer-events-none z-10" />
+          <Input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => onDateFilterChange(e.target.value)}
+            className="pl-10 bg-card border-border"
+            placeholder="Filtrar por data"
           />
         </div>
         
@@ -42,17 +53,6 @@ const ProductFilters = ({
             <SelectItem value="unavailable">Apenas indisponíveis</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-      
-      <div className="relative">
-        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="date"
-          value={dateFilter}
-          onChange={(e) => onDateFilterChange(e.target.value)}
-          className="pl-10 bg-card border-border w-full sm:w-[300px]"
-          placeholder="Filtrar por data"
-        />
       </div>
     </div>
   );

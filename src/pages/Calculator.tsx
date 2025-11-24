@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { INSTALLMENT_RATES, calculateInstallment, formatCurrency } from "@/lib/installmentRates";
-import { Link } from "react-router-dom";
 import sealStoreLogo from "@/assets/seal-store-logo.png";
+import Navigation from "@/components/Navigation";
 
 const Calculator = () => {
   const [productValue, setProductValue] = useState<string>("");
@@ -35,7 +35,7 @@ const Calculator = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border shadow-elegant">
         <div className="container mx-auto px-4 py-8">
-          <Link to="/" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+          <div className="flex items-center gap-4">
             <img 
               src={sealStoreLogo} 
               alt="Seal Store Logo" 
@@ -43,11 +43,13 @@ const Calculator = () => {
             />
             <div>
               <h1 className="text-4xl font-bold text-foreground tracking-tight">SEAL STORE</h1>
-              <p className="text-sm text-muted-foreground mt-1">Calculadora de Taxas</p>
+              <p className="text-sm text-muted-foreground mt-1">Sistema de Gestão</p>
             </div>
-          </Link>
+          </div>
         </div>
       </header>
+
+      <Navigation />
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-2">

@@ -2,14 +2,18 @@ import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { INSTALLMENT_RATES, calculateInstallment, formatCurrency } from "@/lib/installmentRates";
+import { calculateInstallment, formatCurrency, PaymentMethod, CardBrand } from "@/lib/installmentRates";
 import sealStoreLogo from "@/assets/seal-store-logo.png";
 import Navigation from "@/components/Navigation";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Calculator = () => {
   const [productValue, setProductValue] = useState<string>("");
   const [tradeInValue, setTradeInValue] = useState<string>("");
   const [downPayment, setDownPayment] = useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('link');
+  const [cardBrand, setCardBrand] = useState<CardBrand>('VISA');
 
   const baseValue = useMemo(() => {
     const product = parseFloat(productValue) || 0;
@@ -19,17 +23,22 @@ const Calculator = () => {
   }, [productValue, tradeInValue, downPayment]);
 
   const installmentTable = useMemo(() => {
-    return Object.keys(INSTALLMENT_RATES).map((key) => {
-      const installments = parseInt(key);
-      const { finalValue, installmentValue, rate } = calculateInstallment(baseValue, installments);
+    const installments = Array.from({ length: 18 }, (_, i) => i + 1);
+    return installments.map((installmentCount) => {
+      const { finalValue, installmentValue, rate } = calculateInstallment(
+        baseValue, 
+        installmentCount,
+        paymentMethod,
+        paymentMethod === 'pagseguro' ? cardBrand : undefined
+      );
       return {
-        installments,
+        installments: installmentCount,
         rate,
         finalValue,
         installmentValue,
       };
     });
-  }, [baseValue]);
+  }, [baseValue, paymentMethod, cardBrand]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,6 +61,42 @@ const Calculator = () => {
       <Navigation />
 
       <main className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Card className="bg-card border-border">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-foreground mb-3 block text-sm font-medium">Tipo de Taxa</Label>
+                  <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+                    <TabsList className="grid w-full max-w-md grid-cols-2">
+                      <TabsTrigger value="link">Link de Pagamento</TabsTrigger>
+                      <TabsTrigger value="pagseguro">PagSeguro</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                {paymentMethod === 'pagseguro' && (
+                  <div>
+                    <Label htmlFor="cardBrand" className="text-foreground">Bandeira do Cartão</Label>
+                    <Select value={cardBrand} onValueChange={(value) => setCardBrand(value as CardBrand)}>
+                      <SelectTrigger id="cardBrand" className="bg-card border-border mt-2">
+                        <SelectValue placeholder="Selecione a bandeira" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border">
+                        <SelectItem value="VISA">VISA</SelectItem>
+                        <SelectItem value="MASTER">MASTER</SelectItem>
+                        <SelectItem value="ELO">ELO</SelectItem>
+                        <SelectItem value="HIPER">HIPER</SelectItem>
+                        <SelectItem value="DEMAIS">DEMAIS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-2">
           <Card className="bg-card border-border">
             <CardHeader>

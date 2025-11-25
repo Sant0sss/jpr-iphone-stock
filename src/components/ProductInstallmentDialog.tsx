@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Copy } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
 import { calculateInstallment, formatCurrency, PaymentMethod, CardBrand, INSTALLMENT_RATES } from "@/lib/installmentRates";
@@ -21,6 +22,9 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("link");
   const [cardBrand, setCardBrand] = useState<CardBrand>("VISA");
   const [installments, setInstallments] = useState<string>("1");
+  const [entryOption, setEntryOption] = useState<string>("sem");
+  const [entryType, setEntryType] = useState<string>("dinheiro");
+  const [entryValue, setEntryValue] = useState<string>("0");
 
   const basePrice = product.preco_numerico || 0;
   
@@ -28,26 +32,34 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   const sealClubPrice = basePrice;
   const savings = normalPrice - sealClubPrice;
 
+  const parsedEntryValue = parseFloat(entryValue) || 0;
+  const hasEntry = entryOption === "com";
+  
+  const remainingNormalPrice = hasEntry ? Math.max(0, normalPrice - parsedEntryValue) : normalPrice;
+  const remainingSealClubPrice = hasEntry ? Math.max(0, sealClubPrice - parsedEntryValue) : sealClubPrice;
+
   const installmentData = useMemo(() => {
     return calculateInstallment(
-      sealClubPrice,
+      remainingSealClubPrice,
       parseInt(installments),
       paymentMethod,
       paymentMethod === "pagseguro" ? cardBrand : undefined
     );
-  }, [sealClubPrice, installments, paymentMethod, cardBrand]);
+  }, [remainingSealClubPrice, installments, paymentMethod, cardBrand]);
 
   const handleCopy = () => {
     const normalInstallmentData = calculateInstallment(
-      normalPrice,
+      remainingNormalPrice,
       parseInt(installments),
       paymentMethod,
       paymentMethod === "pagseguro" ? cardBrand : undefined
     );
 
-    const text = `${product.produto || 'Produto'}
+    let text = `${product.produto || 'Produto'}\n\n`;
 
-🟨 Valor normal:
+    if (!hasEntry) {
+      // A) SEM ENTRADA
+      text += `🟨 Valor normal:
 💰 À vista: ${formatCurrency(normalPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
 Total: ${formatCurrency(normalInstallmentData.finalValue)}
@@ -58,6 +70,37 @@ Total: ${formatCurrency(normalInstallmentData.finalValue)}
 Total: ${formatCurrency(installmentData.finalValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)}`;
+    } else if (entryType === "dinheiro") {
+      // B) ENTRADA EM DINHEIRO
+      text += `💵 Com o valor de entrada fica:
+
+🟨 Valor normal:
+💰 Valor restante à vista: ${formatCurrency(remainingNormalPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+Total após entrada: ${formatCurrency(normalInstallmentData.finalValue)}
+
+🟦 Para membros SealClub:
+💰 Valor restante à vista: ${formatCurrency(remainingSealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+Total após entrada: ${formatCurrency(installmentData.finalValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)}`;
+    } else {
+      // C) ENTRADA COM CELULAR
+      text += `📱 Com o teu aparelho de entrada fica:
+
+🟨 Valor normal:
+💰 Valor restante à vista: ${formatCurrency(remainingNormalPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+Total após entrada: ${formatCurrency(normalInstallmentData.finalValue)}
+
+🟦 Para membros SealClub:
+💰 Valor restante à vista: ${formatCurrency(remainingSealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+Total após entrada: ${formatCurrency(installmentData.finalValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)}`;
+    }
 
     navigator.clipboard.writeText(text);
     toast({
@@ -135,6 +178,49 @@ Total: ${formatCurrency(installmentData.finalValue)}
             </Select>
           </div>
 
+          {/* Entrada */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Entrada</Label>
+            <Select value={entryOption} onValueChange={setEntryOption}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sem">Sem entrada</SelectItem>
+                <SelectItem value="com">Com entrada</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tipo de Entrada (só se escolher "Com entrada") */}
+          {entryOption === "com" && (
+            <>
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Tipo de entrada</Label>
+                <Select value={entryType} onValueChange={setEntryType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="celular">Celular</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Valor da entrada</Label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={entryValue}
+                  onChange={(e) => setEntryValue(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
+
           {/* Resultado do Cálculo */}
           <div className="bg-accent/20 rounded-lg p-4 space-y-2">
             <div className="flex justify-between">
@@ -159,13 +245,19 @@ Total: ${formatCurrency(installmentData.finalValue)}
 
           {/* Valores SealClub */}
           <div className="bg-primary/10 rounded-lg p-4 space-y-2 border border-primary/20">
+            {hasEntry && (
+              <div className="flex justify-between pb-2 border-b border-primary/20">
+                <span className="text-sm text-muted-foreground">Valor da entrada:</span>
+                <span className="font-semibold">{formatCurrency(parsedEntryValue)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Valor normal:</span>
-              <span className="font-semibold">{formatCurrency(normalPrice)}</span>
+              <span className="text-sm text-muted-foreground">{hasEntry ? "Valor restante normal:" : "Valor normal:"}</span>
+              <span className="font-semibold">{formatCurrency(hasEntry ? remainingNormalPrice : normalPrice)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Para membros SealClub:</span>
-              <span className="font-bold text-primary">{formatCurrency(sealClubPrice)}</span>
+              <span className="text-sm text-muted-foreground">{hasEntry ? "Valor restante SealClub:" : "Para membros SealClub:"}</span>
+              <span className="font-bold text-primary">{formatCurrency(hasEntry ? remainingSealClubPrice : sealClubPrice)}</span>
             </div>
             <div className="flex justify-between pt-2 border-t border-primary/20">
               <span className="text-sm font-medium">Economia imediata:</span>

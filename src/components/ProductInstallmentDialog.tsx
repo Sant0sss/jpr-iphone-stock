@@ -38,16 +38,26 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   }, [sealClubPrice, installments, paymentMethod, cardBrand]);
 
   const handleCopy = () => {
+    const normalInstallmentData = calculateInstallment(
+      normalPrice,
+      parseInt(installments),
+      paymentMethod,
+      paymentMethod === "pagseguro" ? cardBrand : undefined
+    );
+
     const text = `${product.produto || 'Produto'}
 
 🟨 Valor normal:
-💰 Valor à vista ${formatCurrency(normalPrice)}
+💰 À vista: ${formatCurrency(normalPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+Total: ${formatCurrency(normalInstallmentData.finalValue)}
 
 🟦 Para membros SealClub:
-💰 Valor à vista ${formatCurrency(sealClubPrice)}
+💰 À vista: ${formatCurrency(sealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+Total: ${formatCurrency(installmentData.finalValue)}
 
-💰 Economia imediata: ${formatCurrency(savings)}
-na compra só por ser membro`;
+💰 Economia imediata: ${formatCurrency(savings)}`;
 
     navigator.clipboard.writeText(text);
     toast({

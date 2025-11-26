@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -108,44 +107,33 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
           {/* Tipo de Pagamento */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Tipo de pagamento</Label>
-            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="link" id="link" />
-                <Label htmlFor="link" className="cursor-pointer">Link de Pagamento</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="pagseguro" id="pagseguro" />
-                <Label htmlFor="pagseguro" className="cursor-pointer">PagSeguro</Label>
-              </div>
-            </RadioGroup>
+            <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="link">Link de Pagamento</SelectItem>
+                <SelectItem value="pagseguro">PagSeguro</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Bandeira (só se PagSeguro) */}
           {paymentMethod === "pagseguro" && (
             <div className="space-y-3">
               <Label className="text-base font-semibold">Bandeira</Label>
-              <RadioGroup value={cardBrand} onValueChange={(value) => setCardBrand(value as CardBrand)}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="VISA" id="visa" />
-                  <Label htmlFor="visa" className="cursor-pointer">Visa</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="MASTER" id="master" />
-                  <Label htmlFor="master" className="cursor-pointer">Master</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ELO" id="elo" />
-                  <Label htmlFor="elo" className="cursor-pointer">Elo</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="HIPER" id="hiper" />
-                  <Label htmlFor="hiper" className="cursor-pointer">Hiper</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="DEMAIS" id="demais" />
-                  <Label htmlFor="demais" className="cursor-pointer">Demais</Label>
-                </div>
-              </RadioGroup>
+              <Select value={cardBrand} onValueChange={(value) => setCardBrand(value as CardBrand)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VISA">Visa</SelectItem>
+                  <SelectItem value="MASTER">Mastercard</SelectItem>
+                  <SelectItem value="ELO">Elo</SelectItem>
+                  <SelectItem value="HIPER">Hipercard</SelectItem>
+                  <SelectItem value="DEMAIS">Demais</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
 

@@ -5,19 +5,19 @@ import { Search, Calendar } from "lucide-react";
 interface ProductFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  stockFilter: string;
+  onStockFilterChange: (value: string) => void;
   dateFilter: string;
   onDateFilterChange: (value: string) => void;
-  conditionFilter: string;
-  onConditionFilterChange: (value: string) => void;
 }
 
 const ProductFilters = ({ 
   searchTerm, 
   onSearchChange, 
+  stockFilter, 
+  onStockFilterChange,
   dateFilter,
-  onDateFilterChange,
-  conditionFilter,
-  onConditionFilterChange
+  onDateFilterChange
 }: ProductFiltersProps) => {
   return (
     <div className="mb-6">
@@ -43,14 +43,14 @@ const ProductFilters = ({
           />
         </div>
         
-        <Select value={conditionFilter} onValueChange={onConditionFilterChange}>
+        <Select value={stockFilter} onValueChange={onStockFilterChange}>
           <SelectTrigger className="w-full sm:w-[200px] bg-card border-border">
-            <SelectValue placeholder="Filtrar por condição" />
+            <SelectValue placeholder="Filtrar estoque" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="novo">Novo</SelectItem>
-            <SelectItem value="seminovo">Seminovo</SelectItem>
+            <SelectItem value="all">Todos os produtos</SelectItem>
+            <SelectItem value="available">Apenas disponíveis</SelectItem>
+            <SelectItem value="unavailable">Apenas indisponíveis</SelectItem>
           </SelectContent>
         </Select>
       </div>

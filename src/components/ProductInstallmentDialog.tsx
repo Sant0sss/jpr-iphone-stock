@@ -60,40 +60,46 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     if (!hasEntry) {
       // A) SEM ENTRADA
       text += `🟨 Valor normal:
+💰 À vista: ${formatCurrency(normalPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
 Total: ${formatCurrency(normalInstallmentData.finalValue)}
 
 🟦 Para membros SealClub:
+💰 À vista: ${formatCurrency(sealClubPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 Total: ${formatCurrency(installmentData.finalValue)}
 
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+💰 Economia imediata: ${formatCurrency(savings)}`;
     } else if (entryType === "dinheiro") {
       // B) ENTRADA EM DINHEIRO
       text += `💵 Com o valor de entrada fica:
 
 🟨 Valor normal:
+💰 Valor restante à vista: ${formatCurrency(remainingNormalPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-Total: ${formatCurrency(normalInstallmentData.finalValue)}
+Total após entrada: ${formatCurrency(normalInstallmentData.finalValue)}
 
 🟦 Para membros SealClub:
+💰 Valor restante à vista: ${formatCurrency(remainingSealClubPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-Total: ${formatCurrency(installmentData.finalValue)}
+Total após entrada: ${formatCurrency(installmentData.finalValue)}
 
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+💰 Economia imediata: ${formatCurrency(savings)}`;
     } else {
       // C) ENTRADA COM CELULAR
       text += `📱 Com o teu aparelho de entrada fica:
 
 🟨 Valor normal:
+💰 Valor restante à vista: ${formatCurrency(remainingNormalPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-Total: ${formatCurrency(normalInstallmentData.finalValue)}
+Total após entrada: ${formatCurrency(normalInstallmentData.finalValue)}
 
 🟦 Para membros SealClub:
+💰 Valor restante à vista: ${formatCurrency(remainingSealClubPrice)}
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-Total: ${formatCurrency(installmentData.finalValue)}
+Total após entrada: ${formatCurrency(installmentData.finalValue)}
 
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+💰 Economia imediata: ${formatCurrency(savings)}`;
     }
 
     navigator.clipboard.writeText(text);

@@ -15,8 +15,8 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  const isAvailable = product.estoque?.toLowerCase().includes('disponível') || 
-                      product.estoque?.toLowerCase().includes('disponivel');
+  const isNovo = product.novo_seminovo?.toLowerCase() === 'novo';
+  const condition = product.novo_seminovo || 'N/A';
   
   return (
     <Card className="bg-gradient-card shadow-elegant hover:shadow-hover transition-all duration-300 border-border/50">
@@ -26,10 +26,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {product.produto || 'Produto sem nome'}
           </CardTitle>
           <Badge 
-            variant={isAvailable ? "default" : "secondary"}
-            className={isAvailable ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}
+            variant={isNovo ? "default" : "secondary"}
+            className={isNovo ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}
           >
-            {isAvailable ? 'Disponível' : 'Indisponível'}
+            {condition}
           </Badge>
         </div>
       </CardHeader>
@@ -50,8 +50,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
         
         {product.preco && (
           <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-            <span className="text-sm font-medium text-muted-foreground">Preço à vista:</span>
+            <span className="text-sm font-medium text-muted-foreground">Preço SealClub (à vista):</span>
             <span className="text-lg font-bold text-primary">{product.preco}</span>
+          </div>
+        )}
+        
+        {product['Fora do Clube C/NF'] && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Valor normal:</span>
+            <span className="text-sm text-foreground">{product['Fora do Clube C/NF']}</span>
+          </div>
+        )}
+        
+        {product.Economia && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Economia:</span>
+            <span className="text-sm font-bold text-success">{product.Economia}</span>
           </div>
         )}
 
@@ -63,13 +77,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Calculator className="mr-2 h-4 w-4" />
           Calcular Parcelamento
         </Button>
-        
-        {product.data && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/50">
-            <span>Atualizado em:</span>
-            <span>{product.data}</span>
-          </div>
-        )}
       </CardContent>
 
       <ProductInstallmentDialog 

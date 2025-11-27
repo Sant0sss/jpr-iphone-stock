@@ -18,35 +18,44 @@ export type Database = {
         Row: {
           cores: string | null
           created_at: string
-          data: string | null
-          estoque: string | null
+          Economia: string | null
+          "Fora do Clube C/NF": string | null
           id: number
+          novo_seminovo: string | null
+          parcelado12: string | null
           preco: string | null
           preco_numerico: number | null
           produto: string | null
           revendedor: string | null
+          Total: string | null
         }
         Insert: {
           cores?: string | null
           created_at?: string
-          data?: string | null
-          estoque?: string | null
+          Economia?: string | null
+          "Fora do Clube C/NF"?: string | null
           id?: number
+          novo_seminovo?: string | null
+          parcelado12?: string | null
           preco?: string | null
           preco_numerico?: number | null
           produto?: string | null
           revendedor?: string | null
+          Total?: string | null
         }
         Update: {
           cores?: string | null
           created_at?: string
-          data?: string | null
-          estoque?: string | null
+          Economia?: string | null
+          "Fora do Clube C/NF"?: string | null
           id?: number
+          novo_seminovo?: string | null
+          parcelado12?: string | null
           preco?: string | null
           preco_numerico?: number | null
           produto?: string | null
           revendedor?: string | null
+          Total?: string | null
         }
         Relationships: []
       }

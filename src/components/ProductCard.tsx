@@ -21,6 +21,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-lg font-semibold text-foreground">
             {product.produto || 'Produto sem nome'}
+            {product.Armazenamento && ` (${product.Armazenamento})`}
           </CardTitle>
           <Badge 
             variant="default"

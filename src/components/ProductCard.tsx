@@ -15,8 +15,6 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  const isNovo = product.novo_seminovo?.toLowerCase() === 'novo';
-  
   return (
     <Card className="bg-gradient-card shadow-elegant hover:shadow-hover transition-all duration-300 border-border/50">
       <CardHeader className="pb-3">
@@ -25,8 +23,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {product.produto || 'Produto sem nome'}
           </CardTitle>
           <Badge 
-            variant={isNovo ? "default" : "secondary"}
-            className={isNovo ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}
+            variant="default"
+            className="bg-success text-success-foreground"
           >
             {product.novo_seminovo || 'N/A'}
           </Badge>

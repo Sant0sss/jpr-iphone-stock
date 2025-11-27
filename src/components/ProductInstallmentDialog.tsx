@@ -19,12 +19,14 @@ interface ProductInstallmentDialogProps {
 }
 
 const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstallmentDialogProps) => {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("link");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pagseguro");
   const [cardBrand, setCardBrand] = useState<CardBrand>("VISA");
   const [installments, setInstallments] = useState<string>("1");
   const [entryOption, setEntryOption] = useState<string>("sem");
   const [entryType, setEntryType] = useState<string>("dinheiro");
   const [entryValue, setEntryValue] = useState<string>("0");
+  const [phoneEntryValue, setPhoneEntryValue] = useState<string>("0");
+  const [cashEntryValue, setCashEntryValue] = useState<string>("0");
 
   const basePrice = product.preco_numerico || 0;
   
@@ -32,7 +34,10 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   const sealClubPrice = basePrice;
   const savings = normalPrice - sealClubPrice;
 
-  const parsedEntryValue = parseFloat(entryValue) || 0;
+  // Calculate total entry value based on entry type
+  const parsedEntryValue = entryType === "celular_dinheiro" 
+    ? (parseFloat(phoneEntryValue) || 0) + (parseFloat(cashEntryValue) || 0)
+    : parseFloat(entryValue) || 0;
   const hasEntry = entryOption === "com";
   
   const remainingNormalPrice = hasEntry ? Math.max(0, normalPrice - parsedEntryValue) : normalPrice;
@@ -47,6 +52,11 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     );
   }, [remainingSealClubPrice, installments, paymentMethod, cardBrand]);
 
+  // Build product name with storage if available
+  const productNameWithStorage = product.Armazenamento 
+    ? `${product.produto || 'Produto'} ${product.Armazenamento}`
+    : product.produto || 'Produto';
+
   const handleCopy = () => {
     const normalInstallmentData = calculateInstallment(
       remainingNormalPrice,
@@ -55,7 +65,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
       paymentMethod === "pagseguro" ? cardBrand : undefined
     );
 
-    let text = `${product.produto || 'Produto'}\n\n`;
+    let text = `${productNameWithStorage}\n\n`;
 
     if (!hasEntry) {
       // A) SEM ENTRADA
@@ -77,9 +87,20 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-    } else {
+    } else if (entryType === "celular") {
       // C) ENTRADA COM CELULAR
       text += `📱 Com o teu aparelho de entrada fica:
+
+🟨 Valor normal:
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+
+🟦 Para membros SealClub:
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+    } else {
+      // D) ENTRADA COM CELULAR + DINHEIRO
+      text += `📱 Com o teu aparelho de entrada + o valor em dinheiro fica:
 
 🟨 Valor normal:
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
@@ -101,7 +122,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{product.produto || 'Produto'}</DialogTitle>
+          <DialogTitle className="text-xl">{productNameWithStorage}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
@@ -110,12 +131,12 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
             <Label className="text-base font-semibold">Tipo de pagamento</Label>
             <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="link" id="link" />
-                <Label htmlFor="link" className="cursor-pointer">Link de Pagamento</Label>
-              </div>
-              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="pagseguro" id="pagseguro" />
                 <Label htmlFor="pagseguro" className="cursor-pointer">PagSeguro</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="link" id="link" />
+                <Label htmlFor="link" className="cursor-pointer">Link de Pagamento</Label>
               </div>
             </RadioGroup>
           </div>
@@ -192,20 +213,47 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
                   <SelectContent>
                     <SelectItem value="celular">Celular</SelectItem>
                     <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="celular_dinheiro">Celular + Dinheiro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Valor da entrada</Label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={entryValue}
-                  onChange={(e) => setEntryValue(e.target.value)}
-                  className="w-full"
-                />
-              </div>
+              {/* Campos de entrada baseados no tipo */}
+              {entryType === "celular_dinheiro" ? (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Valor do celular de entrada</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={phoneEntryValue}
+                      onChange={(e) => setPhoneEntryValue(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Valor em dinheiro</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={cashEntryValue}
+                      onChange={(e) => setCashEntryValue(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">Valor da entrada</Label>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={entryValue}
+                    onChange={(e) => setEntryValue(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              )}
             </>
           )}
 

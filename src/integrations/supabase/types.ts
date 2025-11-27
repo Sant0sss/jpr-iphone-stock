@@ -16,11 +16,15 @@ export type Database = {
     Tables: {
       produtos: {
         Row: {
+          Armazenamento: string | null
           cores: string | null
           created_at: string
+          Custo: string | null
           Economia: string | null
           "Fora do Clube C/NF": string | null
           id: number
+          Lucro: string | null
+          Margem: string | null
           novo_seminovo: string | null
           parcelado12: string | null
           preco: string | null
@@ -30,11 +34,15 @@ export type Database = {
           Total: string | null
         }
         Insert: {
+          Armazenamento?: string | null
           cores?: string | null
           created_at?: string
+          Custo?: string | null
           Economia?: string | null
           "Fora do Clube C/NF"?: string | null
           id?: number
+          Lucro?: string | null
+          Margem?: string | null
           novo_seminovo?: string | null
           parcelado12?: string | null
           preco?: string | null
@@ -44,11 +52,15 @@ export type Database = {
           Total?: string | null
         }
         Update: {
+          Armazenamento?: string | null
           cores?: string | null
           created_at?: string
+          Custo?: string | null
           Economia?: string | null
           "Fora do Clube C/NF"?: string | null
           id?: number
+          Lucro?: string | null
+          Margem?: string | null
           novo_seminovo?: string | null
           parcelado12?: string | null
           preco?: string | null

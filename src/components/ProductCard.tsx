@@ -15,8 +15,7 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  const isAvailable = product.estoque?.toLowerCase().includes('disponível') || 
-                      product.estoque?.toLowerCase().includes('disponivel');
+  const isNovo = product.novo_seminovo?.toLowerCase() === 'novo';
   
   return (
     <Card className="bg-gradient-card shadow-elegant hover:shadow-hover transition-all duration-300 border-border/50">
@@ -26,10 +25,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {product.produto || 'Produto sem nome'}
           </CardTitle>
           <Badge 
-            variant={isAvailable ? "default" : "secondary"}
-            className={isAvailable ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}
+            variant={isNovo ? "default" : "secondary"}
+            className={isNovo ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground"}
           >
-            {isAvailable ? 'Disponível' : 'Indisponível'}
+            {product.novo_seminovo || 'N/A'}
           </Badge>
         </div>
       </CardHeader>
@@ -64,10 +63,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           Calcular Parcelamento
         </Button>
         
-        {product.data && (
+        {product.created_at && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/50">
             <span>Atualizado em:</span>
-            <span>{product.data}</span>
+            <span>{new Date(product.created_at).toLocaleDateString('pt-BR')}</span>
           </div>
         )}
       </CardContent>

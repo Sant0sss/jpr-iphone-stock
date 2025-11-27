@@ -10,8 +10,8 @@ type Product = Database['public']['Tables']['produtos']['Row'];
 
 const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [stockFilter, setStockFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
+  const [conditionFilter, setConditionFilter] = useState("all");
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['produtos'],
@@ -35,30 +35,19 @@ const ProductList = () => {
         product.cores?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.revendedor?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesStock = 
-        stockFilter === "all" ||
-        (stockFilter === "available" && (
-          product.estoque?.toLowerCase().includes('disponível') || 
-          product.estoque?.toLowerCase().includes('disponivel')
-        )) ||
-        (stockFilter === "unavailable" && !(
-          product.estoque?.toLowerCase().includes('disponível') || 
-          product.estoque?.toLowerCase().includes('disponivel')
-        ));
-      
       const matchesDate = !dateFilter || (() => {
-        if (!product.data) return false;
-        // Normalizar ambas as datas para comparação
-        // Se data do banco está em DD/MM/YYYY, converter para YYYY-MM-DD
-        const dbDate = product.data.includes('/') 
-          ? product.data.split('/').reverse().join('-') 
-          : product.data;
-        return dbDate === dateFilter;
+        if (!product.created_at) return false;
+        const productDate = new Date(product.created_at).toISOString().split('T')[0];
+        return productDate === dateFilter;
       })();
       
-      return matchesSearch && matchesStock && matchesDate;
+      const matchesCondition = 
+        conditionFilter === "all" ||
+        product.novo_seminovo?.toLowerCase() === conditionFilter.toLowerCase();
+      
+      return matchesSearch && matchesDate && matchesCondition;
     });
-  }, [products, searchTerm, stockFilter, dateFilter]);
+  }, [products, searchTerm, dateFilter, conditionFilter]);
 
   if (isLoading) {
     return (
@@ -81,10 +70,10 @@ const ProductList = () => {
       <ProductFilters
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        stockFilter={stockFilter}
-        onStockFilterChange={setStockFilter}
         dateFilter={dateFilter}
         onDateFilterChange={setDateFilter}
+        conditionFilter={conditionFilter}
+        onConditionFilterChange={setConditionFilter}
       />
       
       {filteredProducts.length === 0 ? (

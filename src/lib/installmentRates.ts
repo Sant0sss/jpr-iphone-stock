@@ -1,6 +1,7 @@
 // Taxas oficiais de parcelamento - Link de Pagamento
-export const INSTALLMENT_RATES: Record<number, number> = {
-  1: 0,
+export const INSTALLMENT_RATES: Record<number | string, number> = {
+  debito: 1.05,
+  1: 3.1,
   2: 4.7,
   3: 5.55,
   4: 6.4,
@@ -129,7 +130,7 @@ export const PAGSEGURO_RATES = {
   },
 };
 
-export type PaymentMethod = 'link' | 'pagseguro';
+export type PaymentMethod = 'pix' | 'pagseguro' | 'link';
 export type CardBrand = 'VISA' | 'MASTER' | 'ELO' | 'HIPER' | 'DEMAIS';
 
 export const getRate = (

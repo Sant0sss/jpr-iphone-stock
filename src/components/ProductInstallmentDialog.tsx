@@ -243,6 +243,9 @@ Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  {paymentMethod === "link" && (
+                    <SelectItem value="debito">Débito</SelectItem>
+                  )}
                   {Object.keys(INSTALLMENT_RATES).filter(key => key !== 'debito').map((key) => (
                     <SelectItem key={key} value={key}>
                       {key}x

@@ -52,12 +52,10 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     );
   }, [remainingSealClubPrice, installments, paymentMethod, cardBrand]);
 
-  // Build product name with storage and condition if available
-  const productFullName = [
-    product.produto || 'Produto',
-    product.Armazenamento,
-    product.novo_seminovo
-  ].filter(Boolean).join(' ');
+  // Build product name with storage if available
+  const productNameWithStorage = product.Armazenamento 
+    ? `${product.produto || 'Produto'} ${product.Armazenamento}`
+    : product.produto || 'Produto';
 
   const handleCopy = () => {
     const normalInstallmentData = calculateInstallment(
@@ -67,72 +65,42 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
       paymentMethod === "pagseguro" ? cardBrand : undefined
     );
 
-    // Check if it's PIX (1x installment)
-    const isPix = installments === "1";
-    
-    let text = `${productFullName}\n\n`;
+    let text = `${productNameWithStorage}\n\n`;
 
-    if (isPix) {
-      // PIX Templates
-      text += `⚡ Pagamento via PIX\n\n`;
-      
-      if (!hasEntry) {
-        // PIX A) SEM ENTRADA
-        text += `🟨 Valor normal:
-💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
+    if (!hasEntry) {
+      // A) SEM ENTRADA
+      text += `🟨 Valor normal:
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
 
 🟦 Para membros SealClub:
-💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else if (entryType === "dinheiro") {
-        // PIX B) ENTRADA EM DINHEIRO
-        text += `Com a entrada de ${formatCurrency(parsedEntryValue)}, o restante no PIX fica:
+    } else if (entryType === "dinheiro") {
+      // B) ENTRADA EM DINHEIRO
+      text += `💵 Com o valor de ${formatCurrency(parsedEntryValue)} como entrada fica:
 
 🟨 Valor normal:
-💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
 
 🟦 Para membros SealClub:
-💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else if (entryType === "celular") {
-        // PIX C) ENTRADA COM CELULAR
-        text += `Com o aparelho de entrada, o restante no PIX fica:
+    } else if (entryType === "celular") {
+      // C) ENTRADA COM CELULAR
+      text += `📱 Com o teu aparelho de entrada fica:
 
 🟨 Valor normal:
-💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
 
 🟦 Para membros SealClub:
-💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else {
-        // PIX D) ENTRADA COM CELULAR + DINHEIRO
-        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, o restante no PIX fica:
-
-🟨 Valor normal:
-💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
-
-🟦 Para membros SealClub:
-💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
-
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      }
     } else {
-      // Card/Installment Templates
-      if (!hasEntry) {
-        // A) SEM ENTRADA
-        text += `🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-
-🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else if (entryType === "dinheiro") {
-        // B) ENTRADA EM DINHEIRO
-        text += `Com a entrada de ${formatCurrency(parsedEntryValue)} fica:
+      // D) ENTRADA COM CELULAR + DINHEIRO
+      text += `📱 Com o teu aparelho de entrada + o valor em dinheiro fica:
 
 🟨 Valor normal:
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
@@ -141,29 +109,6 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else if (entryType === "celular") {
-        // C) ENTRADA COM CELULAR
-        text += `Com o aparelho de entrada fica:
-
-🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-
-🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      } else {
-        // D) ENTRADA COM CELULAR + DINHEIRO
-        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)} fica:
-
-🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-
-🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-      }
     }
 
     navigator.clipboard.writeText(text);
@@ -177,7 +122,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{productFullName}</DialogTitle>
+          <DialogTitle className="text-xl">{productNameWithStorage}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">

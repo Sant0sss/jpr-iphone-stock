@@ -44,6 +44,9 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   const remainingSealClubPrice = hasEntry ? Math.max(0, sealClubPrice - parsedEntryValue) : sealClubPrice;
 
   const installmentData = useMemo(() => {
+    if (paymentMethod === "pix") {
+      return { finalValue: remainingSealClubPrice, installmentValue: remainingSealClubPrice, rate: 0 };
+    }
     return calculateInstallment(
       remainingSealClubPrice,
       parseInt(installments),
@@ -52,10 +55,11 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     );
   }, [remainingSealClubPrice, installments, paymentMethod, cardBrand]);
 
-  // Build product name with storage if available
-  const productNameWithStorage = product.Armazenamento 
-    ? `${product.produto || 'Produto'} ${product.Armazenamento}`
-    : product.produto || 'Produto';
+  // Build product name with storage and condition
+  const condition = product.novo_seminovo || '';
+  const productFullName = product.Armazenamento 
+    ? `${product.produto || 'Produto'} ${product.Armazenamento}${condition ? ` ${condition}` : ''}`
+    : `${product.produto || 'Produto'}${condition ? ` ${condition}` : ''}`;
 
   const handleCopy = () => {
     const normalInstallmentData = calculateInstallment(
@@ -65,42 +69,75 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
       paymentMethod === "pagseguro" ? cardBrand : undefined
     );
 
-    let text = `${productNameWithStorage}\n\n`;
+    let text = `${productFullName}\n\n`;
 
-    if (!hasEntry) {
-      // A) SEM ENTRADA
-      text += `🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
-
-🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
-
-💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-    } else if (entryType === "dinheiro") {
-      // B) ENTRADA EM DINHEIRO
-      text += `💵 Com o valor de ${formatCurrency(parsedEntryValue)} como entrada fica:
+    if (paymentMethod === "pix") {
+      // PIX Templates
+      if (!hasEntry) {
+        // PIX A) SEM ENTRADA
+        text += `⚡ Pagamento via PIX
 
 🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
 
 🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
-    } else if (entryType === "celular") {
-      // C) ENTRADA COM CELULAR
-      text += `📱 Com o teu aparelho de entrada fica:
+      } else if (entryType === "dinheiro") {
+        // PIX B) ENTRADA EM DINHEIRO
+        text += `⚡ Pagamento via PIX
+
+Com a entrada de ${formatCurrency(parsedEntryValue)}, o restante no PIX fica:
 
 🟨 Valor normal:
-💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
 
 🟦 Para membros SealClub:
-💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      } else if (entryType === "celular") {
+        // PIX C) ENTRADA COM CELULAR
+        text += `⚡ Pagamento via PIX
+
+Com o aparelho de entrada, o restante no PIX fica:
+
+🟨 Valor normal:
+💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
+
+🟦 Para membros SealClub:
+💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      } else {
+        // PIX D) ENTRADA COM CELULAR + DINHEIRO
+        text += `⚡ Pagamento via PIX
+
+Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, o restante no PIX fica:
+
+🟨 Valor normal:
+💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
+
+🟦 Para membros SealClub:
+💵 À vista no PIX: ${formatCurrency(remainingSealClubPrice)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      }
     } else {
-      // D) ENTRADA COM CELULAR + DINHEIRO
-      text += `📱 Com o teu aparelho de entrada + o valor em dinheiro fica:
+      // Card Templates
+      if (!hasEntry) {
+        // A) SEM ENTRADA
+        text += `🟨 Valor normal:
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+
+🟦 Para membros SealClub:
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      } else if (entryType === "dinheiro") {
+        // B) ENTRADA EM DINHEIRO
+        text += `Com a entrada de ${formatCurrency(parsedEntryValue)} fica:
 
 🟨 Valor normal:
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
@@ -109,6 +146,29 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
 
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      } else if (entryType === "celular") {
+        // C) ENTRADA COM CELULAR
+        text += `Com o aparelho de entrada fica:
+
+🟨 Valor normal:
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+
+🟦 Para membros SealClub:
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      } else {
+        // D) ENTRADA COM CELULAR + DINHEIRO
+        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)} fica:
+
+🟨 Valor normal:
+💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}
+
+🟦 Para membros SealClub:
+💳 Parcelado em ${installments}x de ${formatCurrency(installmentData.installmentValue)}
+
+💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
+      }
     }
 
     navigator.clipboard.writeText(text);
@@ -122,7 +182,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{productNameWithStorage}</DialogTitle>
+          <DialogTitle className="text-xl">{productFullName}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
@@ -130,6 +190,10 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
           <div className="space-y-3">
             <Label className="text-base font-semibold">Tipo de pagamento</Label>
             <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pix" id="pix" />
+                <Label htmlFor="pix" className="cursor-pointer">PIX</Label>
+              </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="pagseguro" id="pagseguro" />
                 <Label htmlFor="pagseguro" className="cursor-pointer">PagSeguro</Label>
@@ -170,22 +234,24 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
             </div>
           )}
 
-          {/* Número de Parcelas */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Número de parcelas</Label>
-            <Select value={installments} onValueChange={setInstallments}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(INSTALLMENT_RATES).map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}x
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Número de Parcelas (não mostra para PIX) */}
+          {paymentMethod !== "pix" && (
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Número de parcelas</Label>
+              <Select value={installments} onValueChange={setInstallments}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(INSTALLMENT_RATES).filter(key => key !== 'debito').map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}x
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Entrada */}
           <div className="space-y-3">
@@ -259,24 +325,39 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 
           {/* Resultado do Cálculo */}
           <div className="bg-accent/20 rounded-lg p-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="font-medium text-muted-foreground">Taxa aplicada:</span>
-              <span className="font-semibold">{installmentData.rate.toFixed(2)}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium text-muted-foreground">Parcela:</span>
-              <span className="text-lg font-bold text-primary">{formatCurrency(installmentData.installmentValue)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium text-muted-foreground">Total final:</span>
-              <span className="font-semibold">{formatCurrency(installmentData.finalValue)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Tipo de taxa:</span>
-              <span className="font-medium">
-                {paymentMethod === "link" ? "Link de Pagamento" : `PagSeguro - ${cardBrand}`}
-              </span>
-            </div>
+            {paymentMethod === "pix" ? (
+              <>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Método:</span>
+                  <span className="font-semibold">⚡ PIX (À vista)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Valor SealClub:</span>
+                  <span className="text-lg font-bold text-primary">{formatCurrency(remainingSealClubPrice)}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Taxa aplicada:</span>
+                  <span className="font-semibold">{installmentData.rate.toFixed(2)}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Parcela:</span>
+                  <span className="text-lg font-bold text-primary">{formatCurrency(installmentData.installmentValue)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium text-muted-foreground">Total final:</span>
+                  <span className="font-semibold">{formatCurrency(installmentData.finalValue)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tipo de taxa:</span>
+                  <span className="font-medium">
+                    {paymentMethod === "link" ? "Link de Pagamento" : `PagSeguro - ${cardBrand}`}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Valores SealClub */}

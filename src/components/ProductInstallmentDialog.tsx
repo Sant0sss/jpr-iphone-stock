@@ -75,9 +75,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
       // PIX Templates
       if (!hasEntry) {
         // PIX A) SEM ENTRADA
-        text += `⚡ Pagamento via PIX
-
-🟨 Valor normal:
+        text += `🟨 Valor normal:
 💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
 
 🟦 Para membros SealClub:
@@ -86,9 +84,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
       } else if (entryType === "dinheiro") {
         // PIX B) ENTRADA EM DINHEIRO
-        text += `⚡ Pagamento via PIX
-
-Com a entrada de ${formatCurrency(parsedEntryValue)}, o restante no PIX fica:
+        text += `Com a entrada de ${formatCurrency(parsedEntryValue)}, o restante no PIX fica:
 
 🟨 Valor normal:
 💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
@@ -99,9 +95,7 @@ Com a entrada de ${formatCurrency(parsedEntryValue)}, o restante no PIX fica:
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
       } else if (entryType === "celular") {
         // PIX C) ENTRADA COM CELULAR
-        text += `⚡ Pagamento via PIX
-
-Com o aparelho de entrada, o restante no PIX fica:
+        text += `Com o aparelho de entrada, o restante no PIX fica:
 
 🟨 Valor normal:
 💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
@@ -112,9 +106,7 @@ Com o aparelho de entrada, o restante no PIX fica:
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
       } else {
         // PIX D) ENTRADA COM CELULAR + DINHEIRO
-        text += `⚡ Pagamento via PIX
-
-Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, o restante no PIX fica:
+        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, o restante no PIX fica:
 
 🟨 Valor normal:
 💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}

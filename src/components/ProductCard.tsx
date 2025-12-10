@@ -5,6 +5,7 @@ import { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Calculator } from "lucide-react";
 import ProductInstallmentDialog from "./ProductInstallmentDialog";
+import { cn } from "@/lib/utils";
 
 type Product = Database['public']['Tables']['produtos']['Row'];
 
@@ -14,21 +15,58 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const conditionRaw = product.novo_seminovo?.trim().toLowerCase();
+  const conditionLabel = conditionRaw === "novo" ? "Novo" : conditionRaw === "seminovo" ? "Seminovo" : undefined;
+  const conditionClass =
+    conditionLabel === "Novo"
+      ? "bg-emerald-500 text-emerald-50"
+      : conditionLabel === "Seminovo"
+        ? "bg-amber-400 text-amber-950"
+        : "";
+
+  // Nome do produto + armazenamento (da coluna armazenamento/Armazenamento)
+  const productName = product.produto?.trim() || "Produto sem nome";
+  const storage = product.Armazenamento ?? (product as unknown as { armazenamento?: string }).armazenamento ?? null;
+  const displayName = storage ? `${productName} ${storage}` : productName;
+
+  // Formata preço no padrão BRL (R$ 1.234,56)
+  const formatPrice = () => {
+    const formatter = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    if (product.preco_numerico !== null && product.preco_numerico !== undefined) {
+      return formatter.format(product.preco_numerico);
+    }
+
+    if (product.preco) {
+      // Normaliza string de preço que possa vir com separadores locais
+      const normalized = product.preco
+        .replace(/[^\d,.-]/g, "") // remove símbolos
+        .replace(/\./g, "") // remove separador de milhar com ponto
+        .replace(",", "."); // converte decimal para ponto
+
+      const value = Number(normalized);
+      if (!Number.isNaN(value)) {
+        return formatter.format(value);
+      }
+      // fallback para valor original caso parsing falhe
+      return product.preco;
+    }
+
+    return "R$ 0,00";
+  };
   
   return (
     <Card className="bg-gradient-card shadow-elegant hover:shadow-hover transition-all duration-300 border-border/50">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-lg font-semibold text-foreground">
-            {product.produto || 'Produto sem nome'}
-            {product.Armazenamento && ` (${product.Armazenamento})`}
+            {displayName}
           </CardTitle>
-          <Badge 
-            variant="default"
-            className="bg-success text-success-foreground"
-          >
-            {product.novo_seminovo || 'N/A'}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -45,11 +83,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <span className="text-sm text-foreground">{product.revendedor}</span>
           </div>
         )}
+
+        {conditionLabel && (
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={cn("border-transparent font-semibold", conditionClass)}
+            >
+              {conditionLabel}
+            </Badge>
+          </div>
+        )}
         
         {product.preco && (
           <div className="flex items-center gap-2 pt-2 border-t border-border/50">
             <span className="text-sm font-medium text-muted-foreground">Preço à vista:</span>
-            <span className="text-lg font-bold text-primary">{product.preco}</span>
+            <span className="text-lg font-bold text-primary">{formatPrice()}</span>
           </div>
         )}
 

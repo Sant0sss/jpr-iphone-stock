@@ -26,6 +26,21 @@ const ProductList = () => {
     },
   });
 
+  const getPriority = (name?: string | null) => {
+    const label = name?.toLowerCase() || "";
+    if (label.startsWith("iphone")) return 0;
+    if (label.startsWith("ipad")) return 1;
+    if (label.startsWith("macbook")) return 2;
+    return 3;
+  };
+
+  // Extrai o primeiro número do nome para ordenar por modelo (ex: iPhone 13 < iPhone 17)
+  const getModelNumber = (name?: string | null) => {
+    if (!name) return Number.POSITIVE_INFINITY;
+    const match = name.match(/(\d+)/);
+    return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+  };
+
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     
@@ -48,6 +63,22 @@ const ProductList = () => {
       return matchesSearch && matchesDate && matchesCondition;
     });
   }, [products, searchTerm, dateFilter, conditionFilter]);
+
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      const priorityDiff = getPriority(a.produto) - getPriority(b.produto);
+      if (priorityDiff !== 0) return priorityDiff;
+
+      const modelA = getModelNumber(a.produto);
+      const modelB = getModelNumber(b.produto);
+      if (modelA !== modelB) return modelA - modelB; // menor modelo primeiro
+
+      // fallback: mais recentes primeiro quando modelo empata ou não há número
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [filteredProducts]);
 
   if (isLoading) {
     return (
@@ -82,7 +113,7 @@ const ProductList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

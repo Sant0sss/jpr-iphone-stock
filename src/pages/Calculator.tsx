@@ -15,10 +15,25 @@ const Calculator = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('link');
   const [cardBrand, setCardBrand] = useState<CardBrand>('VISA');
 
+  // Função helper para normalizar valores brasileiros (vírgula -> ponto)
+  const parseBrazilianNumber = (value: string): number => {
+    if (!value || value.trim() === "") return 0;
+    // Remove espaços e caracteres não numéricos exceto vírgula e ponto
+    const cleaned = value.replace(/\s/g, "").replace(/[^\d,.-]/g, "");
+    // Se tiver vírgula, assume formato brasileiro (1.234,56)
+    if (cleaned.includes(",")) {
+      // Remove pontos (separadores de milhar) e substitui vírgula por ponto
+      const normalized = cleaned.replace(/\./g, "").replace(",", ".");
+      return parseFloat(normalized) || 0;
+    }
+    // Se não tiver vírgula, usa parseFloat direto
+    return parseFloat(cleaned) || 0;
+  };
+
   const baseValue = useMemo(() => {
-    const product = parseFloat(productValue) || 0;
-    const tradeIn = parseFloat(tradeInValue) || 0;
-    const down = parseFloat(downPayment) || 0;
+    const product = parseBrazilianNumber(productValue);
+    const tradeIn = parseBrazilianNumber(tradeInValue);
+    const down = parseBrazilianNumber(downPayment);
     return Math.max(0, product - tradeIn - down);
   }, [productValue, tradeInValue, downPayment]);
 

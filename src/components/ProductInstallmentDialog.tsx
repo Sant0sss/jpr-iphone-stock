@@ -28,16 +28,109 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
   const [phoneEntryValue, setPhoneEntryValue] = useState<string>("0");
   const [cashEntryValue, setCashEntryValue] = useState<string>("0");
 
-  const basePrice = product.preco_numerico || 0;
+  // Função helper para parsear valores de preço (string) para número
+  const parsePriceString = (priceString: string | null | undefined): number => {
+    if (!priceString || typeof priceString !== 'string') return 0;
+    
+    // Remove símbolos e espaços, mantém apenas números, vírgula e ponto
+    const cleaned = priceString.trim().replace(/\s/g, "").replace(/[^\d,.-]/g, "");
+    
+    // Se após limpar não sobrou nada, retorna 0
+    if (!cleaned || cleaned.length === 0) return 0;
+    
+    // Se tiver vírgula, assume formato brasileiro (1.234,56)
+    if (cleaned.includes(",")) {
+      // Remove pontos (separadores de milhar) e substitui vírgula por ponto
+      const normalized = cleaned.replace(/\./g, "").replace(",", ".");
+      const value = parseFloat(normalized);
+      return isNaN(value) ? 0 : value;
+    }
+    
+    // Se não tiver vírgula, usa parseFloat direto
+    const value = parseFloat(cleaned);
+    return isNaN(value) ? 0 : value;
+  };
+
+  // Função helper para normalizar valores brasileiros (vírgula -> ponto) - para inputs
+  const parseBrazilianNumber = (value: string): number => {
+    if (!value || value.trim() === "") return 0;
+    // Remove espaços e caracteres não numéricos exceto vírgula e ponto
+    const cleaned = value.replace(/\s/g, "").replace(/[^\d,.-]/g, "");
+    // Se tiver vírgula, assume formato brasileiro (1.234,56)
+    if (cleaned.includes(",")) {
+      // Remove pontos (separadores de milhar) e substitui vírgula por ponto
+      const normalized = cleaned.replace(/\./g, "").replace(",", ".");
+      return parseFloat(normalized) || 0;
+    }
+    // Se não tiver vírgula, usa parseFloat direto
+    return parseFloat(cleaned) || 0;
+  };
+
+  // Obtém valores do banco de dados
+  // fora_do_club = valor normal (campo no banco)
+  // preco = valor para membros SealClub
+  // Tenta acessar o campo de várias formas possíveis
+  const getForaDoClubValue = (): string | null => {
+    // Converte para any para acessar propriedades dinamicamente
+    const productAny = product as any;
+    
+    // Lista todas as chaves do objeto para debug
+    const allKeys = Object.keys(productAny);
+    console.log('🔍 Todas as chaves do produto:', allKeys);
+    
+    // Procura por qualquer chave que contenha "fora" ou "clube"
+    const matchingKeys = allKeys.filter(key => 
+      key.toLowerCase().includes('fora') || 
+      key.toLowerCase().includes('clube') ||
+      key.toLowerCase().includes('clube')
+    );
+    console.log('🔑 Chaves relacionadas a "fora/clube":', matchingKeys);
+    
+    // Tenta snake_case primeiro (campo real no banco: fora_do_club)
+    if (productAny.fora_do_club !== null && productAny.fora_do_club !== undefined) {
+      const value = String(productAny.fora_do_club).trim();
+      if (value !== '' && value !== 'null' && value !== 'undefined') {
+        console.log('✅ Encontrado em fora_do_club:', value);
+        return value;
+      }
+    }
+    
+    // Tenta o nome com espaços (pode ser como vem do Supabase: "Fora do Clube C/NF")
+    if (productAny["Fora do Clube C/NF"] !== null && productAny["Fora do Clube C/NF"] !== undefined) {
+      const value = String(productAny["Fora do Clube C/NF"]).trim();
+      if (value !== '' && value !== 'null' && value !== 'undefined') {
+        console.log('✅ Encontrado em "Fora do Clube C/NF":', value);
+        return value;
+      }
+    }
+    
+    // Tenta todas as chaves que podem corresponder
+    for (const key of matchingKeys) {
+      const value = productAny[key];
+      if (value !== null && value !== undefined) {
+        const strValue = String(value).trim();
+        if (strValue !== '' && strValue !== 'null' && strValue !== 'undefined') {
+          console.log(`✅ Encontrado em ${key}:`, strValue);
+          return strValue;
+        }
+      }
+    }
+    
+    console.log('❌ Campo fora_do_club não encontrado!');
+    return null;
+  };
   
-  const normalPrice = basePrice * 1.08 + 800;
-  const sealClubPrice = basePrice;
+  const foraDoClubValue = getForaDoClubValue();
+  const normalPrice = parsePriceString(foraDoClubValue);
+  console.log('💰 Valor normal calculado:', normalPrice, 'de:', foraDoClubValue);
+  
+  const sealClubPrice = parsePriceString(product.preco);
   const savings = normalPrice - sealClubPrice;
 
   // Calculate total entry value based on entry type
   const parsedEntryValue = entryType === "celular_dinheiro" 
-    ? (parseFloat(phoneEntryValue) || 0) + (parseFloat(cashEntryValue) || 0)
-    : parseFloat(entryValue) || 0;
+    ? parseBrazilianNumber(phoneEntryValue) + parseBrazilianNumber(cashEntryValue)
+    : parseBrazilianNumber(entryValue);
   const hasEntry = entryOption === "com";
   
   const remainingNormalPrice = hasEntry ? Math.max(0, normalPrice - parsedEntryValue) : normalPrice;
@@ -57,8 +150,9 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 
   // Build product name with storage and condition
   const condition = product.novo_seminovo || '';
-  const productFullName = product.Armazenamento 
-    ? `${product.produto || 'Produto'} ${product.Armazenamento}${condition ? ` ${condition}` : ''}`
+  const storage = product.Armazenamento ?? (product as unknown as { armazenamento?: string }).armazenamento ?? null;
+  const productFullName = storage 
+    ? `${product.produto || 'Produto'} ${storage}${condition ? ` ${condition}` : ''}`
     : `${product.produto || 'Produto'}${condition ? ` ${condition}` : ''}`;
 
   const handleCopy = () => {
@@ -106,7 +200,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
       } else {
         // PIX D) ENTRADA COM CELULAR + DINHEIRO
-        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)}, o restante no PIX fica:
+        text += `Com o aparelho de entrada + ${formatCurrency(parseBrazilianNumber(cashEntryValue))}, o restante no PIX fica:
 
 🟨 Valor normal:
 💵 À vista no PIX: ${formatCurrency(remainingNormalPrice)}
@@ -151,7 +245,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 💰 Economia imediata: ${formatCurrency(savings)} na compra só por ser membro`;
       } else {
         // D) ENTRADA COM CELULAR + DINHEIRO
-        text += `Com o aparelho de entrada + ${formatCurrency(parseFloat(cashEntryValue) || 0)} fica:
+        text += `Com o aparelho de entrada + ${formatCurrency(parseBrazilianNumber(cashEntryValue))} fica:
 
 🟨 Valor normal:
 💳 Parcelado em ${installments}x de ${formatCurrency(normalInstallmentData.installmentValue)}

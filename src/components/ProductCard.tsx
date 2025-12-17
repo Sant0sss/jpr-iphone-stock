@@ -24,9 +24,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
         ? "bg-amber-400 text-amber-950"
         : "";
 
-  // Nome do produto + armazenamento (da coluna armazenamento)
+  // Nome do produto + armazenamento (da coluna armazenamento/Armazenamento)
   const productName = product.produto?.trim() || "Produto sem nome";
-  const storage = product.armazenamento ?? null;
+  const storage = product.Armazenamento ?? (product as unknown as { armazenamento?: string }).armazenamento ?? null;
   const displayName = storage ? `${productName} ${storage}` : productName;
 
   // Formata preço no padrão BRL (R$ 1.234,56)
@@ -37,6 +37,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+
+    if (product.preco_numerico !== null && product.preco_numerico !== undefined) {
+      return formatter.format(product.preco_numerico);
+    }
 
     if (product.preco) {
       // Normaliza string de preço que possa vir com separadores locais

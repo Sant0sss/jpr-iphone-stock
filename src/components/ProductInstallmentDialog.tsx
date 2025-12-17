@@ -150,7 +150,7 @@ const ProductInstallmentDialog = ({ product, open, onOpenChange }: ProductInstal
 
   // Build product name with storage and condition
   const condition = product.novo_seminovo || '';
-  const storage = product.Armazenamento ?? (product as unknown as { armazenamento?: string }).armazenamento ?? null;
+  const storage = product.armazenamento ?? null;
   const productFullName = storage 
     ? `${product.produto || 'Produto'} ${storage}${condition ? ` ${condition}` : ''}`
     : `${product.produto || 'Produto'}${condition ? ` ${condition}` : ''}`;

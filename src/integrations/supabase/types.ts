@@ -14,60 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      documents: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          fts: unknown
+          id: number
+          metadata: Json | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          fts?: unknown
+          id?: never
+          metadata?: Json | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          fts?: unknown
+          id?: never
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       produtos: {
         Row: {
-          Armazenamento: string | null
+          armazenamento: string | null
+          atualized_at: string | null
           cores: string | null
           created_at: string
-          Custo: string | null
-          Economia: string | null
-          "Fora do Clube C/NF": string | null
+          economia: string | null
+          fora_do_club: string | null
           id: number
-          Lucro: string | null
-          Margem: string | null
           novo_seminovo: string | null
           parcelado12: string | null
           preco: string | null
-          preco_numerico: number | null
           produto: string | null
           revendedor: string | null
-          Total: string | null
+          sku: string | null
+          total: string | null
         }
         Insert: {
-          Armazenamento?: string | null
+          armazenamento?: string | null
+          atualized_at?: string | null
           cores?: string | null
           created_at?: string
-          Custo?: string | null
-          Economia?: string | null
-          "Fora do Clube C/NF"?: string | null
+          economia?: string | null
+          fora_do_club?: string | null
           id?: number
-          Lucro?: string | null
-          Margem?: string | null
           novo_seminovo?: string | null
           parcelado12?: string | null
           preco?: string | null
-          preco_numerico?: number | null
           produto?: string | null
           revendedor?: string | null
-          Total?: string | null
+          sku?: string | null
+          total?: string | null
         }
         Update: {
-          Armazenamento?: string | null
+          armazenamento?: string | null
+          atualized_at?: string | null
           cores?: string | null
           created_at?: string
-          Custo?: string | null
-          Economia?: string | null
-          "Fora do Clube C/NF"?: string | null
+          economia?: string | null
+          fora_do_club?: string | null
           id?: number
-          Lucro?: string | null
-          Margem?: string | null
           novo_seminovo?: string | null
           parcelado12?: string | null
           preco?: string | null
-          preco_numerico?: number | null
           produto?: string | null
           revendedor?: string | null
-          Total?: string | null
+          sku?: string | null
+          total?: string | null
+        }
+        Relationships: []
+      }
+      produtos_backup: {
+        Row: {
+          armazenamento: string | null
+          atualized_at: string | null
+          cores: string | null
+          created_at: string
+          id: number
+          novo_seminovo: string | null
+          preco: string | null
+          produto: string | null
+          revendedor: string | null
+          sku: string | null
+        }
+        Insert: {
+          armazenamento?: string | null
+          atualized_at?: string | null
+          cores?: string | null
+          created_at?: string
+          id?: number
+          novo_seminovo?: string | null
+          preco?: string | null
+          produto?: string | null
+          revendedor?: string | null
+          sku?: string | null
+        }
+        Update: {
+          armazenamento?: string | null
+          atualized_at?: string | null
+          cores?: string | null
+          created_at?: string
+          id?: number
+          novo_seminovo?: string | null
+          preco?: string | null
+          produto?: string | null
+          revendedor?: string | null
+          sku?: string | null
         }
         Relationships: []
       }
@@ -76,7 +133,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      hybrid_search: {
+        Args: {
+          full_text_weight?: number
+          match_count: number
+          query_embedding: string
+          query_text: string
+          rrf_k?: number
+          semantic_weight?: number
+        }
+        Returns: {
+          content: string
+          id: number
+          rank: number
+          score: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

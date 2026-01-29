@@ -2,15 +2,27 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+<<<<<<< HEAD
 // Hardcoded for JPR project ("uutfdyqzjlehcchrdgro")
 const SUPABASE_URL = "https://uutfdyqzjlehcchrdgro.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1dGZkeXF6amxlaGNjaHJkZ3JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTQ4NTEsImV4cCI6MjA3OTQ5MDg1MX0.k0-xxTn1pN0aJxjMpwX8EqOypXXWMEbD6IXDxZGQMp8";
 
+=======
+const SUPABASE_URL = "https://uutfdyqzjlehcchrdgro.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1dGZkeXF6amxlaGNjaHJkZ3JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTQ4NTEsImV4cCI6MjA3OTQ5MDg1MX0.k0-xxTn1pN0aJxjMpwX8EqOypXXWMEbD6IXDxZGQMp8";
+
+// Import the supabase client like this:
+// import { supabase } from "@/integrations/supabase/client";
+
+>>>>>>> bdcf22e94b2521577834a6e895c1d62e48381a20
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+<<<<<<< HEAD
     detectSessionInUrl: true,
+=======
+>>>>>>> bdcf22e94b2521577834a6e895c1d62e48381a20
   }
 });

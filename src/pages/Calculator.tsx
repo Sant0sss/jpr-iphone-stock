@@ -8,10 +8,20 @@ import sealStoreLogo from "@/assets/seal-store-logo.png";
 import Navigation from "@/components/Navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, LogOut } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Calculator = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   // Dados do produto
   const [productName, setProductName] = useState<string>("");
   const [storage, setStorage] = useState<string>("");
@@ -156,16 +166,26 @@ const Calculator = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border shadow-elegant">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-4">
-            <img 
-              src={sealStoreLogo} 
-              alt="Seal Store Logo" 
-              className="h-16 object-contain"
-            />
-            <div>
-              <h1 className="text-4xl font-bold text-foreground tracking-tight">SEAL STORE</h1>
-              <p className="text-sm text-muted-foreground mt-1">Sistema de Gestão</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img 
+                src={sealStoreLogo} 
+                alt="Seal Store Logo" 
+                className="h-16 object-contain"
+              />
+              <div>
+                <h1 className="text-4xl font-bold text-foreground tracking-tight">SEAL STORE</h1>
+                <p className="text-sm text-muted-foreground mt-1">Sistema de Gestão</p>
+              </div>
             </div>
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
           </div>
         </div>
       </header>

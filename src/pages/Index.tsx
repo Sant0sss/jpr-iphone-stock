@@ -2,22 +2,44 @@ import ProductList from "@/components/ProductList";
 import PriceUploader from "@/components/PriceUploader";
 import sealStoreLogo from "@/assets/seal-store-logo.png";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border shadow-elegant">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-4">
-            <img 
-              src={sealStoreLogo} 
-              alt="Seal Store Logo" 
-              className="h-16 object-contain"
-            />
-            <div>
-              <h1 className="text-4xl font-bold text-foreground tracking-tight">SEAL STORE</h1>
-              <p className="text-sm text-muted-foreground mt-1">Sistema de Gestão</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img 
+                src={sealStoreLogo} 
+                alt="Seal Store Logo" 
+                className="h-16 object-contain"
+              />
+              <div>
+                <h1 className="text-4xl font-bold text-foreground tracking-tight">SEAL STORE</h1>
+                <p className="text-sm text-muted-foreground mt-1">Sistema de Gestão</p>
+              </div>
             </div>
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
           </div>
         </div>
       </header>

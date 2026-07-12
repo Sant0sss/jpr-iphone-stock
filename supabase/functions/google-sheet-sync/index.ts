@@ -207,17 +207,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Apaga todos os registros antes de reinserir para evitar duplicatas
-    const { error: deleteError } = await supabaseClient
-      .from('produtos')
-      .delete()
-      .neq('id', 0);
-
-    if (deleteError) throw deleteError;
-
-    const { error } = await supabaseClient
-      .from('produtos')
-      .insert(records);
+    // Fase 1 do auto-sync: delete + insert numa ÚNICA transação (RPC), pra a tabela
+    // nunca ficar vazia entre os dois passos — o banco é compartilhado com a loja.
+    const { data: insertedCount, error } = await supabaseClient
+      .rpc('sync_produtos', { records });
 
     if (error) {
       throw error;
@@ -227,7 +220,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         sheetTitle: resolvedTitle,
-        insertedRows: records.length,
+        insertedRows: insertedCount ?? records.length,
         totalSourceRows: rows.length,
         sampleRecords: records.slice(0, 2),
       }),

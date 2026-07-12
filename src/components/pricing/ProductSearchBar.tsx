@@ -43,6 +43,10 @@ export const ProductSearchBar = ({ onSelect, selectedProduct, onClear }: Product
       if (error) throw error;
       return (data as Product[]) || [];
     },
+    // Auto-sync (Fase 3): mantém a busca em dia com o que a planilha sincronizou.
+    // 5s: sistema interno com ~3 usuários, carga irrelevante; acompanha o sync rápido.
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   });
 
   const filteredProducts = useMemo(() => {

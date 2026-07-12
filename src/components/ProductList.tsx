@@ -24,6 +24,11 @@ const ProductList = () => {
       if (error) throw error;
       return data as Product[];
     },
+    // Auto-sync (Fase 3): a planilha pode reescrever `produtos` a qualquer momento;
+    // atualiza a lista sozinha sem depender de F5. 5s (não 30s) porque é sistema
+    // interno com ~3 usuários — carga irrelevante — e acompanha o sync rápido (~10s total).
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   });
 
   const getPriority = (name?: string | null) => {

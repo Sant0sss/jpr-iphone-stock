@@ -2,8 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://uutfdyqzjlehcchrdgro.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1dGZkeXF6amxlaGNjaHJkZ3JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTQ4NTEsImV4cCI6MjA3OTQ5MDg1MX0.k0-xxTn1pN0aJxjMpwX8EqOypXXWMEbD6IXDxZGQMp8";
+// Lê de variável de ambiente (Vite) quando disponível, com fallback para produção.
+// Prod: `npm run dev` / build normal. Teste: `npm run dev:test` (carrega .env.dbtest).
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? "https://uutfdyqzjlehcchrdgro.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1dGZkeXF6amxlaGNjaHJkZ3JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTQ4NTEsImV4cCI6MjA3OTQ5MDg1MX0.k0-xxTn1pN0aJxjMpwX8EqOypXXWMEbD6IXDxZGQMp8";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

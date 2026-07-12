@@ -20,13 +20,13 @@
 
 // ===================== CONFIG (ajuste aqui) =====================
 var CONFIG = {
-  // URL da Edge Function. TESTE (JPR TESTE):
-  FUNCTION_URL: 'https://dckdmtxvtfypxbjxjqrb.supabase.co/functions/v1/google-sheet-sync',
-  // Para PRODUÇÃO, troque para:
-  // FUNCTION_URL: 'https://uutfdyqzjlehcchrdgro.supabase.co/functions/v1/google-sheet-sync',
+  // URL da Edge Function. PRODUÇÃO (JPR):
+  FUNCTION_URL: 'https://uutfdyqzjlehcchrdgro.supabase.co/functions/v1/google-sheet-sync',
+  // Para TESTE (JPR TESTE), troque para:
+  // FUNCTION_URL: 'https://dckdmtxvtfypxbjxjqrb.supabase.co/functions/v1/google-sheet-sync',
 
-  // anon key do MESMO projeto da FUNCTION_URL acima. (anon do JPR TESTE)
-  ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRja2RtdHh2dGZ5cHhianhqcXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNzY5MjMsImV4cCI6MjA5ODc1MjkyM30.r-xjOE6AXcbqkkIW997E_BSBl4of_VxmuMQ9iEuMVo0',
+  // anon key do MESMO projeto da FUNCTION_URL acima. (anon de PRODUÇÃO / JPR)
+  ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1dGZkeXF6amxlaGNjaHJkZ3JvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MTQ4NTEsImV4cCI6MjA3OTQ5MDg1MX0.k0-xxTn1pN0aJxjMpwX8EqOypXXWMEbD6IXDxZGQMp8',
 
   // Identificação da planilha/aba (mesmos valores do .env do app).
   SHEET_ID: '1Lp6PWjl-q5KJsOnZHIbzEWREG0KYnEVM21vacW85Wew',
